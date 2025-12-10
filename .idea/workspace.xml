@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f875b976-4106-4165-9b5b-9762501ae7b9" name="Changes" comment="Z-API Enviando enquete">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="f875b976-4106-4165-9b5b-9762501ae7b9" name="Changes" comment="Z-API recebendo respostas da enquete" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -87,13 +85,22 @@
       <option name="project" value="LOCAL" />
       <updated>1765396934434</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Z-API recebendo respostas da enquete">
+      <option name="closed" value="true" />
+      <created>1765397997356</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1765397997356</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Primeiro commit" />
     <MESSAGE value="Z-API teste" />
     <MESSAGE value="Z-API Enviando enquete" />
-    <option name="LAST_COMMIT_MESSAGE" value="Z-API Enviando enquete" />
+    <MESSAGE value="Z-API recebendo respostas da enquete" />
+    <option name="LAST_COMMIT_MESSAGE" value="Z-API recebendo respostas da enquete" />
   </component>
 </project>
