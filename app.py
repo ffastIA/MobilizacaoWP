@@ -2,6 +2,10 @@ import time
 import threading
 import requests
 from flask import Flask, request, jsonify
+import json
+import csv
+import os
+from datetime import datetime
 
 # 1. INICIALIZAÇÃO DO SERVIDOR
 app = Flask(__name__)
@@ -131,8 +135,24 @@ def iniciar_campanha():
 @app.route('/webhook', methods=['POST'])
 def webhook_whatsapp():
     dados = request.json
-    print("\n🔔 Webhook recebido:", dados)
+    print("\n🔔 Webhook recebido!")
+
+    # Vamos salvar TUDO o que chegar num arquivo para analisarmos a estrutura
+    arquivo_existe = os.path.isfile('respostas_enquete.csv')
+
+    with open('respostas_enquete.csv', mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+
+        # Se o arquivo é novo, cria o cabeçalho
+        if not arquivo_existe:
+            writer.writerow(['Data_Hora', 'Dados_Brutos_JSON'])
+
+        # Escreve a data e o JSON completo (como texto)
+        writer.writerow([datetime.now(), json.dumps(dados)])
+
+    print("💾 Dados salvos em 'respostas_enquete.csv'")
     return jsonify({"status": "recebido"}), 200
+
 
 
 # 6. EXECUÇÃO DO SERVIDOR
