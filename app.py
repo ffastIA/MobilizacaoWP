@@ -1,78 +1,112 @@
 import time
 import threading
+import requests
 from flask import Flask, request, jsonify
 
-# Cria a instância do nosso servidor web
 app = Flask(__name__)
 
+# --- CONFIGURAÇÕES DA Z-API ---
+# ⚠️ FAÇA UMA VERIFICAÇÃO DETALHADA AQUI. UM ESPAÇO A MAIS PODE CAUSAR O ERRO.
+INSTANCE_ID = "3EB781FA9D2ED1F65488AE390B3F85C2"
+TOKEN = "F67179A4911B29C10BEA8F67"
+CLIENT_TOKEN = "F81e975abedfa4db7b71b0de1b141a07fS"
 
-# --- LÓGICA DO NOSSO BOT (Ainda simulada) ---
+# --- CONSTANTES ---
+BASE_URL = f"https://api.z-api.io/instances/{INSTANCE_ID}/token/{TOKEN}"
+HEADERS = {"Client-Token": CLIENT_TOKEN, "Content-Type": "application/json"}
+
+# --- LISTA DE CONTATOS ---
+LISTA_CONTATOS = [
+    {"nome": "Meu Numero Pessoal", "telefone": "5511999999999"},
+    {"nome": "Contato Teste 2", "telefone": "5511888888888"}
+]
+
+
+# --- FUNÇÕES REAIS DO WHATSAPP ---
+
+def criar_grupo(nome_do_grupo, participantes):
+    print(f"2. Criando o grupo '{nome_do_grupo}' no WhatsApp...")
+
+    endpoint = f"{BASE_URL}/create-group"
+    payload = {
+        "autoInvite": True,
+        "groupName": nome_do_grupo,
+        "phones": participantes
+    }
+
+    try:
+        response = requests.post(endpoint, json=payload, headers=HEADERS)
+
+        # --- NOSSO NOVO INSPETOR ---
+        print(f"🕵️ RESPOSTA BRUTA DO SERVIDOR (Status: {response.status_code}):")
+        print(response.text)
+        # --- FIM DO INSPETOR ---
+
+        try:
+            data = response.json()
+
+            if response.status_code in [200, 201] and 'error' not in data:
+                group_id = data.get('phone') or data.get('id')
+                if group_id:
+                    print(f"✅ Grupo criado com sucesso! ID: {group_id}")
+                    return group_id
+                else:
+                    print("❌ Erro Inesperado: Resposta de sucesso, mas sem ID.")
+                    return None
+            else:
+                print("❌ Erro retornado pela API (dentro do JSON).")
+                return None
+
+        except requests.exceptions.JSONDecodeError:
+            print("❌ Erro Crítico: A resposta do servidor não é um JSON válido.")
+            return None
+
+    except Exception as e:
+        print(f"❌ Erro de conexão geral: {e}")
+        return None
+
+
+# (O restante do código não precisa de alteração agora)
+def enviar_enquete(group_id, pergunta, opcoes):
+    print("Enviando a enquete...")
+    endpoint = f"{BASE_URL}/send-poll"
+    # ... (código da enquete) ...
+
 
 def executar_logica_de_grupo():
-    """
-    Função que simula o trabalho pesado: criar grupo, adicionar pessoas, etc.
-    Ela vai rodar em "segundo plano" (thread) para não travar o servidor.
-    """
-    print("🚀 Automação iniciada! Simulação em andamento...")
+    print("🚀 Automação real iniciada!")
+    print("1. Lendo a lista de contatos...")
+    todos_os_telefones = [contato['telefone'] for contato in LISTA_CONTATOS]
+    group_id = criar_grupo("Grupo Teste Final", todos_os_telefones)
 
-    print("1. Lendo a planilha (simulado)...")
-    time.sleep(2)  # Pausa para simular a leitura
+    if not group_id:
+        print("🛑 Processo interrompido. Não foi possível criar o grupo.")
+        return
 
-    print("2. Criando o grupo no WhatsApp (simulado)...")
-    time.sleep(3)  # Pausa para simular a criação
-
-    print("3. Adicionando participantes (simulado)...")
-    for i in range(1, 4):
-        print(f"   - Adicionando participante {i}...")
-        time.sleep(5)  # Pausa longa para simular o delay anti-ban
-
-    print("4. Enviando a enquete (simulado)...")
-    time.sleep(2)
-
-    print("🏁 Automação simulada finalizada com sucesso!")
+    time.sleep(5)
+    enviar_enquete(group_id, "Funcionou?", ["Sim", "Não", "Com certeza!"])
+    print("🏁 Automação real finalizada com sucesso!")
 
 
-# --- ROTAS DA NOSSA APLICAÇÃO (ENDPOINTS) ---
-
+# --- ROTAS E EXECUÇÃO ---
 @app.route('/')
 def home():
-    """Esta função roda quando alguém acessa a página inicial."""
-    return "Servidor do Bot Ativo. Pronto para receber ordens! ✅"
+    return "Servidor do Bot Ativo."
 
 
 @app.route('/iniciar-campanha', methods=['GET'])
 def iniciar_campanha():
-    """
-    Este é o nosso "gatilho". Quando acessado, dispara a lógica do bot.
-    """
-    print("🟢 Rota /iniciar-campanha acessada! Disparando a automação...")
-
-    # Criamos uma 'thread' para executar a função pesada sem travar a resposta da página.
     thread = threading.Thread(target=executar_logica_de_grupo)
     thread.start()
-
-    # Retornamos uma resposta imediata para o usuário.
-    return jsonify(
-        {"status": "sucesso", "mensagem": "Campanha iniciada em segundo plano. Verifique os logs do PyCharm."})
+    return jsonify({"status": "sucesso", "mensagem": "Campanha iniciada."})
 
 
 @app.route('/webhook', methods=['POST'])
 def webhook_whatsapp():
-    """
-    Este endpoint vai receber os dados que a API do WhatsApp enviar (webhooks).
-    """
-    print("\n🔔 Webhook recebido!")
-
-    # O método 'request.json' pega os dados que chegam no corpo da requisição.
     dados = request.json
-
-    # Apenas imprimimos os dados recebidos no console por enquanto.
-    print("Dados recebidos:", dados)
-
-    # É uma boa prática sempre responder com um status de sucesso.
+    print("\n🔔 Webhook recebido:", dados)
     return jsonify({"status": "recebido"}), 200
 
 
-# Esta parte faz o servidor rodar quando executamos o arquivo
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
